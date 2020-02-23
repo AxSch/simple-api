@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -30,6 +31,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homePage)
+	router.HandleFunc("/article", createNewArticle).Methods("POST")
 	router.HandleFunc("/articles", returnAllArticles)
 	router.HandleFunc("/articles/{id}", returnSingleArticle)
 	log.Fatal(http.ListenAndServe(":8000", router))
@@ -38,6 +40,15 @@ func handleRequests() {
 func returnAllArticles(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: returnAllArticles")
 	json.NewEncoder(w).Encode(Articles)
+}
+
+func createNewArticle(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var article Article
+	fmt.Fprintf(w, "%+v", string(reqBody))
+	json.Unmarshal(reqBody, &article)
+	Articles = append(Articles, article)
+	json.NewEncoder(w).Encode(article)
 }
 
 func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
