@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // Article model representation of dara
@@ -24,9 +26,10 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRequests() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/articles", returnAllArticles)
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", homePage)
+	router.HandleFunc("/articles", returnAllArticles)
+	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
 func returnAllArticles(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +50,6 @@ func main() {
 			Content: "Article Content",
 		},
 	}
-	fmt.Println("Running at: 127.0.0.1:8000")
+	fmt.Println("Running API at: 127.0.0.1:8000")
 	handleRequests()
 }
